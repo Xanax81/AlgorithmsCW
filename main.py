@@ -1,1 +1,1 @@
-print("initial commit")
+print("Initial Commit")
