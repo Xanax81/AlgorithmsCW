@@ -1,6 +1,4 @@
-print("initial commit")
-print('''
-     norbert the dragon,
-     ivan stop saying fantastic,
-     marcin quit drinking
-     ''')
+import pandas
+
+data = pandas.read_excel (r'C:\Users\Xanax\PycharmProjects\AlgorithmsCW\data.xlsx')
+print(data)
