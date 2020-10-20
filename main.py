@@ -12,6 +12,22 @@ for i in range(len(data)):
     dataToStation.append(data['To Station'][i])
     dataTravelTime.append(data['Travel time Between stations'][i])
 
+possibleMoves = {}  # this is nested dictionary of travel times to all adjacent nodes (stations)
+for i in range(len(data)):  # TODO: time must go +1 whenever we swap lines
+    if dataFromStation[i] in possibleMoves.keys():
+        possibleMoves[dataFromStation[i]][dataToStation[i]] = dataTravelTime[i]
+    else:
+        possibleMoves[dataFromStation[i]] = {}
+        possibleMoves[dataFromStation[i]][dataToStation[i]] = dataTravelTime[i]
+
+    if dataToStation[i] in possibleMoves.keys():
+        possibleMoves[dataToStation[i]][dataFromStation[i]] = dataTravelTime[i]
+    else:
+        possibleMoves[dataToStation[i]] = {}
+        possibleMoves[dataToStation[i]][dataFromStation[i]] = dataTravelTime[i]
+
+print(possibleMoves)
+
 def input_starting_station():
     startingStation = input("What is your starting station?")
     if startingStation not in dataFromStation:
