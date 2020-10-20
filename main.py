@@ -12,6 +12,13 @@ for i in range(len(data)):
     dataToStation.append(data['To Station'][i])
     dataTravelTime.append(data['Travel time Between stations'][i])
 
+    # Some stations in .xlsx ends with blank space; following code will fix it
+    if dataFromStation[i][-1] == ' ':
+        dataFromStation[i] = dataFromStation[i][:-1]
+
+    if dataToStation[i][-1] == ' ':
+        dataToStation[i] = dataToStation[i][:-1]
+
 possibleMoves = {}  # this is nested dictionary of travel times to all adjacent nodes (stations)
 for i in range(len(data)):
     if dataFromStation[i] in possibleMoves.keys():
