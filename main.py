@@ -31,7 +31,10 @@ def input_starting_station():
     if startingStation not in dataFromStation:
         if startingStation not in dataToStation:
             print("There is no such a station D:")
-            input_starting_station()
+            startingStation = input_starting_station()
+            return startingStation
+        else:
+            return startingStation
     else:
         return startingStation
 
@@ -41,7 +44,10 @@ def input_destination():
     if destination not in dataToStation:
         if destination not in dataFromStation:
             print("There is no such a station D:")
-            input_destination()
+            destination = input_destination()
+            return destination
+        else:
+            return destination
     else:
         return destination
 
@@ -54,6 +60,7 @@ def dijkstra(starting_station, destination):
     for node in unseen_nodes:
         shortest_distance[node] = 999999
     shortest_distance[starting_station] = 0
+    #unseen_nodes.pop(starting_station)
 
     while unseen_nodes:
         minimal_distance_node = None
