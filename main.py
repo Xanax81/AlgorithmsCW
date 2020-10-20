@@ -13,7 +13,7 @@ for i in range(len(data)):
     dataTravelTime.append(data['Travel time Between stations'][i])
 
 possibleMoves = {}  # this is nested dictionary of travel times to all adjacent nodes (stations)
-for i in range(len(data)):  # TODO: time must go +1 whenever we swap lines
+for i in range(len(data)):
     if dataFromStation[i] in possibleMoves.keys():
         possibleMoves[dataFromStation[i]][dataToStation[i]] = dataTravelTime[i]
     else:
@@ -52,7 +52,7 @@ def input_destination():
         return destination
 
 
-def dijkstra(starting_station, destination):
+def dijkstra(starting_station, destination):  # TODO: implement tracking line and add +1 to time whenever we swap trains
     shortest_distance = {}
     track_predecessor = {}
     unseen_nodes = possibleMoves
@@ -60,7 +60,6 @@ def dijkstra(starting_station, destination):
     for node in unseen_nodes:
         shortest_distance[node] = 999999
     shortest_distance[starting_station] = 0
-    #unseen_nodes.pop(starting_station)
 
     while unseen_nodes:
         minimal_distance_node = None
@@ -94,6 +93,7 @@ def dijkstra(starting_station, destination):
 
     track_path.insert(0, starting_station)
 
+    # TODO: make GUI displaying results color stations and stuff... I hate frontend D:
     if shortest_distance[destination] != 999999:
         print("Shortest journey time is: " + str(shortest_distance[destination]) + "minutes")
         print("Optimal path is: " + str(track_path))
