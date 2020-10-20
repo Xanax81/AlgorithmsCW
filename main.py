@@ -78,11 +78,11 @@ def input_destination():
 def common_line(list1, list2):
     answer = False
     for x in list1:
-        for y in list2:
-            if x == y:
-                answer = True
-                return answer
+        if x in list2:
+            answer = True
+            return answer
     return answer
+
 
 def dijkstra(starting_station, destination):  # TODO: implement tracking line and add +1 to time whenever we swap trains
     shortest_distance = {}
@@ -96,29 +96,37 @@ def dijkstra(starting_station, destination):  # TODO: implement tracking line an
 
     while unseen_nodes:
         minimal_distance_node = None
+        previous_minimal_distance_node = None
 
         for node in unseen_nodes:
             if minimal_distance_node is None:
                 minimal_distance_node = node
+                previous_minimal_distance_node = node  # we can't swap lines between first and second station anyways
             elif shortest_distance[node] < shortest_distance[minimal_distance_node]:
+                previous_minimal_distance_node = minimal_distance_node
                 minimal_distance_node = node
 
         path_options = possibleMoves[minimal_distance_node].items()
 
         for childNode, weight in path_options:
+            if not common_line(stationLines[childNode], stationLines[previous_minimal_distance_node]):
+                weight += 1
             if weight + shortest_distance[minimal_distance_node] < shortest_distance[childNode]:
                 shortest_distance[childNode] = weight + shortest_distance[minimal_distance_node]
                 track_predecessor[childNode] = minimal_distance_node
+                track_predecessor_line[childNode] = stationLines[minimal_distance_node]
 
         unseen_nodes.pop(minimal_distance_node)
 
     current_node = destination
 
     track_path = []
+    track_lines = []
 
     while current_node != starting_station:
         try:
             track_path.insert(0, current_node)
+            track_lines.insert(0, track_predecessor_line[current_node])
             current_node = track_predecessor[current_node]
         except KeyError:
             print("Path is not reachable")
@@ -130,6 +138,7 @@ def dijkstra(starting_station, destination):  # TODO: implement tracking line an
     if shortest_distance[destination] != 999999:
         print("Shortest journey time is: " + str(shortest_distance[destination]) + "minutes")
         print("Optimal path is: " + str(track_path))
+        print(track_lines)
 
 
 #  inputs TODO: put them in GUI
