@@ -26,8 +26,6 @@ for i in range(len(data)):  # TODO: time must go +1 whenever we swap lines
         possibleMoves[dataToStation[i]] = {}
         possibleMoves[dataToStation[i]][dataFromStation[i]] = dataTravelTime[i]
 
-print(possibleMoves)
-
 def input_starting_station():
     startingStation = input("What is your starting station?")
     if startingStation not in dataFromStation:
