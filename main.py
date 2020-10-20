@@ -47,6 +47,55 @@ def input_destination():
     else:
         return destination
 
+
+def dijkstra(starting_station, destination):
+    shortest_distance = {}
+    track_predecessor = {}
+    unseen_nodes = possibleMoves
+
+    for node in unseen_nodes:
+        shortest_distance[node] = 999999
+    shortest_distance[starting_station] = 0
+
+    while unseen_nodes:
+        minimal_distance_node = None
+
+        for node in unseen_nodes:
+            if minimal_distance_node is None:
+                minimal_distance_node = node
+            elif shortest_distance[node] < shortest_distance[minimal_distance_node]:
+                minimal_distance_node = node
+
+        path_options = possibleMoves[minimal_distance_node].items()
+
+        for childNode, weight in path_options:
+            if weight + shortest_distance[minimal_distance_node] < shortest_distance[childNode]:
+                shortest_distance[childNode] = weight + shortest_distance[minimal_distance_node]
+                track_predecessor[childNode] = minimal_distance_node
+
+        unseen_nodes.pop(minimal_distance_node)
+
+    current_node = destination
+
+    track_path = []
+
+    while current_node != starting_station:
+        try:
+            track_path.insert(0, current_node)
+            current_node = track_predecessor[current_node]
+        except KeyError:
+            print("Path is not reachable")
+            break
+
+    track_path.insert(0, starting_station)
+
+    if shortest_distance[destination] != 999999:
+        print("Shortest journey time is: " + str(shortest_distance[destination]) + "minutes")
+        print("Optimal path is: " + str(track_path))
+
+
 #  inputs TODO: put them in GUI
 startingStation = input_starting_station()
 destination = input_destination()
+
+dijkstra(startingStation, destination)
