@@ -33,6 +33,22 @@ for i in range(len(data)):
         possibleMoves[dataToStation[i]] = {}
         possibleMoves[dataToStation[i]][dataFromStation[i]] = dataTravelTime[i]
 
+stationLines = {}  # this is dictionary of lists of lines to which every station belongs to
+for i in range(len(data)):
+    if dataFromStation[i] in stationLines.keys():
+        if dataLine[i] not in stationLines[dataFromStation[i]]:  # to avoid duplication
+            stationLines[dataFromStation[i]].append(dataLine[i])  # stationLines key doesn't matter as we'll only be using .items
+    else:
+        stationLines[dataFromStation[i]] = []
+        stationLines[dataFromStation[i]].append(dataLine[i])
+
+    if dataToStation[i] in stationLines.keys():
+        if dataLine[i] not in stationLines[dataToStation[i]]:
+            stationLines[dataToStation[i]].append(dataLine[i])
+    else:
+        stationLines[dataToStation[i]] = []
+        stationLines[dataToStation[i]].append(dataLine[i])
+
 def input_starting_station():
     startingStation = input("What is your starting station?")
     if startingStation not in dataFromStation:
@@ -59,9 +75,19 @@ def input_destination():
         return destination
 
 
+def common_line(list1, list2):
+    answer = False
+    for x in list1:
+        for y in list2:
+            if x == y:
+                answer = True
+                return answer
+    return answer
+
 def dijkstra(starting_station, destination):  # TODO: implement tracking line and add +1 to time whenever we swap trains
     shortest_distance = {}
     track_predecessor = {}
+    track_predecessor_line = {starting_station: stationLines[starting_station]}
     unseen_nodes = possibleMoves
 
     for node in unseen_nodes:
