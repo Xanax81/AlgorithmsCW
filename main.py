@@ -94,23 +94,26 @@ def dijkstra(starting_station, destination):  # TODO: implement tracking line an
         shortest_distance[node] = 999999
     shortest_distance[starting_station] = 0
 
+    minimal_distance_node = None
+
     while unseen_nodes:
-        minimal_distance_node = None
         previous_minimal_distance_node = None
+        if minimal_distance_node is not None:
+            previous_minimal_distance_node = minimal_distance_node  # we can't swap lines between first and second station anyways
+        minimal_distance_node = None
 
         for node in unseen_nodes:
             if minimal_distance_node is None:
                 minimal_distance_node = node
-                previous_minimal_distance_node = node  # we can't swap lines between first and second station anyways
             elif shortest_distance[node] < shortest_distance[minimal_distance_node]:
-                previous_minimal_distance_node = minimal_distance_node
                 minimal_distance_node = node
 
         path_options = possibleMoves[minimal_distance_node].items()
 
         for childNode, weight in path_options:
-            if not common_line(stationLines[childNode], stationLines[previous_minimal_distance_node]):
-                weight += 1
+            if previous_minimal_distance_node is not None:
+                if not common_line(stationLines[childNode], stationLines[previous_minimal_distance_node]):
+                    weight += 1
             if weight + shortest_distance[minimal_distance_node] < shortest_distance[childNode]:
                 shortest_distance[childNode] = weight + shortest_distance[minimal_distance_node]
                 track_predecessor[childNode] = minimal_distance_node
