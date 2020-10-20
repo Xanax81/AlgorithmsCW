@@ -113,7 +113,7 @@ def dijkstra(starting_station, destination):  # TODO: implement tracking line an
         for childNode, weight in path_options:
             if previous_minimal_distance_node is not None:
                 if not common_line(stationLines[childNode], stationLines[previous_minimal_distance_node]):
-                    weight += 1
+                    weight += 3
             if weight + shortest_distance[minimal_distance_node] < shortest_distance[childNode]:
                 shortest_distance[childNode] = weight + shortest_distance[minimal_distance_node]
                 track_predecessor[childNode] = minimal_distance_node
