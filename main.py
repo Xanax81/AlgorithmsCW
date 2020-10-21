@@ -84,7 +84,7 @@ def common_line(list1, list2):
     return answer
 
 
-def dijkstra(starting_station, destination):  # TODO: fix time addition after we swap lines
+def dijkstra(starting_station, destination):  # TODO: hard test
     shortest_distance = {}
     track_predecessor = {}
     track_predecessor_line = {starting_station: stationLines[starting_station]}
@@ -112,7 +112,7 @@ def dijkstra(starting_station, destination):  # TODO: fix time addition after we
 
         for childNode, weight in path_options:
             if previous_minimal_distance_node is not None:
-                if not common_line(stationLines[childNode], stationLines[previous_minimal_distance_node]):
+                if not common_line(stationLines[childNode], track_predecessor_line[previous_minimal_distance_node]):
                     weight += 3
             if weight + shortest_distance[minimal_distance_node] < shortest_distance[childNode]:
                 shortest_distance[childNode] = weight + shortest_distance[minimal_distance_node]
