@@ -19,19 +19,24 @@ for i in range(len(data)):
     if dataToStation[i][-1] == ' ':
         dataToStation[i] = dataToStation[i][:-1]
 
+dataActualTravelTime = dataTravelTime
+for i in range(len(data)):
+    dataActualTravelTime[i] += 1  # this is open doors timing
+    # we can just increase all the times since first node will not be affected and last one is common for all paths
+    # just have to remember to subtract 1 from final solution (destination node time)
 possibleMoves = {}  # this is nested dictionary of travel times to all adjacent nodes (stations)
 for i in range(len(data)):
     if dataFromStation[i] in possibleMoves.keys():
-        possibleMoves[dataFromStation[i]][dataToStation[i]] = dataTravelTime[i]
+        possibleMoves[dataFromStation[i]][dataToStation[i]] = dataActualTravelTime[i]
     else:
         possibleMoves[dataFromStation[i]] = {}
-        possibleMoves[dataFromStation[i]][dataToStation[i]] = dataTravelTime[i]
+        possibleMoves[dataFromStation[i]][dataToStation[i]] = dataActualTravelTime[i]
 
     if dataToStation[i] in possibleMoves.keys():
-        possibleMoves[dataToStation[i]][dataFromStation[i]] = dataTravelTime[i]
+        possibleMoves[dataToStation[i]][dataFromStation[i]] = dataActualTravelTime[i]
     else:
         possibleMoves[dataToStation[i]] = {}
-        possibleMoves[dataToStation[i]][dataFromStation[i]] = dataTravelTime[i]
+        possibleMoves[dataToStation[i]][dataFromStation[i]] = dataActualTravelTime[i]
 
 stationLines = {}  # this is dictionary of lists of lines to which every station belongs to
 for i in range(len(data)):
@@ -134,7 +139,7 @@ def dijkstra(starting_station, destination):  # TODO: hard test
 
     # TODO: make GUI displaying results color stations and stuff... I hate frontend D:
     if shortest_distance[destination] != 999999:
-        print("Shortest journey time is: " + str(shortest_distance[destination]) + "minutes")
+        print("Shortest journey time is: " + str(shortest_distance[destination] - 1) + " minutes")
         print("Optimal path is: " + str(track_path))
         print(track_lines)
 
