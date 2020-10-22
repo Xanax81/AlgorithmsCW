@@ -112,7 +112,7 @@ def dijkstra(starting_station, destination):  # TODO: hard test
 
         for childNode, weight in path_options:
             if previous_minimal_distance_node is not None:
-                if not common_line(stationLines[childNode], track_predecessor_line[previous_minimal_distance_node]):
+                if not common_line(stationLines[childNode], track_predecessor_line[minimal_distance_node]):
                     weight += 3
             if weight + shortest_distance[minimal_distance_node] < shortest_distance[childNode]:
                 shortest_distance[childNode] = weight + shortest_distance[minimal_distance_node]
@@ -136,6 +136,7 @@ def dijkstra(starting_station, destination):  # TODO: hard test
             break
 
     track_path.insert(0, starting_station)
+    track_lines.insert(0, stationLines[starting_station])
 
     # TODO: make GUI displaying results color stations and stuff... I hate frontend D:
     if shortest_distance[destination] != 999999:
