@@ -19,6 +19,14 @@ for i in range(len(data)):
     if dataToStation[i][-1] == ' ':
         dataToStation[i] = dataToStation[i][:-1]
 
+betweenCertainHours = 1 # TODO: make tickbox in GUI and link it here
+
+if betweenCertainHours:
+    for i in range(len(data)):
+        if dataLine[i] == 'Bakerloo':
+            dataTravelTime[i] /= 2
+
+
 dataActualTravelTime = dataTravelTime
 for i in range(len(data)):
     dataActualTravelTime[i] += 1  # this is open doors timing
