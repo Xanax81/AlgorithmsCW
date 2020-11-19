@@ -1,6 +1,7 @@
 import tkinter as tk
+from collections import OrderedDict
 from tkinter import ttk
-
+import copy
 import pandas  # add pandas and xlrd into interpreter
 
 data = pandas.read_excel('data.xlsx')  # receiving data from given excel file
@@ -21,12 +22,6 @@ for i in range(len(data)):
 
     if dataToStation[i][-1] == ' ':
         dataToStation[i] = dataToStation[i][:-1]
-betweenCertainHours = 1 # TODO: make tickbox in GUI and link it here
-
-if betweenCertainHours:
-    for i in range(len(data)):
-        if dataLine[i] == 'Bakerloo':
-            dataTravelTime[i] /= 2
 
 dataActualTravelTime = dataTravelTime
 for i in range(len(data)):
@@ -77,7 +72,7 @@ def dijkstra(starting_station, destination):
     shortest_distance = {}
     track_predecessor = {}
     track_predecessor_line = {starting_station: stationLines[starting_station]}
-    unseen_nodes = possibleMoves
+    unseen_nodes = copy.deepcopy(possibleMoves)
 
     for node in unseen_nodes:
         shortest_distance[node] = 999999
@@ -92,7 +87,7 @@ def dijkstra(starting_station, destination):
             elif shortest_distance[node] < shortest_distance[minimal_distance_node]:
                 minimal_distance_node = node
 
-        path_options = possibleMoves[minimal_distance_node].items()
+        path_options = unseen_nodes[minimal_distance_node].items()
 
         for childNode, weight in path_options:
             if not common_line(stationLines[childNode], track_predecessor_line[minimal_distance_node]):
@@ -122,13 +117,22 @@ def dijkstra(starting_station, destination):
     track_lines.insert(0, stationLines[starting_station])
 
 
+
     if shortest_distance[destination] != 999999:
         print("Shortest journey time is: " + str(shortest_distance[destination] - 1) + " minutes")
         print("Optimal path is: " + str(track_path))
         print(track_lines)
+        #Creating_Table
+        #header
+        print(': List of Stations in journey: List of Lines : Travel time to next station :Total time travel ')
+        # for item in track_path :
+        #         print(':',item," "*(25-len(item)),':')
+        return shortest_distance[destination] - 1, track_path, track_lines
 
-
-
+def bakerloo_line_experiment(self):
+    for i in range(len(data)):
+        if dataLine[i] == 'Bakerloo':
+            dataTravelTime[i] /= 2
 
 class UndergroundGUI(tk.Tk):
 
@@ -158,6 +162,40 @@ class UndergroundGUI(tk.Tk):
 
         quit_button = ttk.Button(self.root, text='Exit Fantastic route Planner', command=self.root.destroy)
         quit_button.pack()
+        self.x = tk.IntVar()
+        c = ttk.Checkbutton(root,
+                            text='Tick the box if your journey take place between 9am-4pm or 7pm-midnight',
+                            command=self.Checkbox(),
+                            variable = self.x,
+                            onvalue=1,
+                            offvalue=0)
+        c.pack()
+
+    def Checkbox(self):
+
+        if (self.x.get() == 1):
+         bakerloo_line_experiment()
+        else:
+            pass
+    def tranform_data(self, track_path, track_lines):
+        path = OrderedDict() # store the path as dict as {station_name: [line_name, travel time]}
+        global possibleMoves
+        prev_station = None
+        for station, lane in zip(track_path, track_lines):
+
+            path[station] = [station, set(lane)]
+            if not prev_station:
+                path[station].append(0) # first station is always 0
+            else:
+                path[station].append(possibleMoves[prev_station[0]][station]) # first station is always 0
+                # Updating travelling lane
+                prev_station[1] = prev_station[1].intersection(path[station][1])
+                path[prev_station[0]] = path[prev_station[0]][1:3]
+
+            prev_station = path[station]
+        # path[track_path[-1]][2] = 0 # setting the last station to 0
+        path[track_path[-1]]= path[track_path[-1]][1:3] #last station
+        return path
 
     def plan_journey_now(self):
 
@@ -170,7 +208,12 @@ class UndergroundGUI(tk.Tk):
 
         # calling dijkstra alg find the route
         path = dijkstra(start_station, destination)
-        print(path)
+        tranformed_data = self.tranform_data(path[1], path[2])
+
+        for station in tranformed_data :
+                print(':',station," "*(25-len(station)),':', " OR ".join(tranformed_data[station][0]),  ":",
+                      tranformed_data[station][1])
+
 
     def input_starting_station(self):
 
