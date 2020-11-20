@@ -1,9 +1,12 @@
+import copy
+import time
 import tkinter as tk
 from collections import OrderedDict
 from tkinter import ttk
-import copy
+
 import pandas  # add pandas and xlrd into interpreter
 
+start_time = time.time()
 data = pandas.read_excel('data.xlsx')  # receiving data from given excel file
 dataLine = []
 dataFromStation = []
@@ -116,23 +119,17 @@ def dijkstra(starting_station, destination):
     track_path.insert(0, starting_station)
     track_lines.insert(0, stationLines[starting_station])
 
-
-
     if shortest_distance[destination] != 999999:
         print("Shortest journey time is: " + str(shortest_distance[destination] - 1) + " minutes")
         print("Optimal path is: " + str(track_path))
         print(track_lines)
-        #Creating_Table
-        #header
+        # Creating_Table
+        # header
         print(': List of Stations in journey: List of Lines : Travel time to next station :Total time travel ')
         # for item in track_path :
         #         print(':',item," "*(25-len(item)),':')
         return shortest_distance[destination] - 1, track_path, track_lines
 
-def bakerloo_line_experiment(self):
-    for i in range(len(data)):
-        if dataLine[i] == 'Bakerloo':
-            dataTravelTime[i] /= 2
 
 class UndergroundGUI(tk.Tk):
 
@@ -162,39 +159,39 @@ class UndergroundGUI(tk.Tk):
 
         quit_button = ttk.Button(self.root, text='Exit Fantastic route Planner', command=self.root.destroy)
         quit_button.pack()
-        self.x = tk.IntVar()
+        self.bakerloo_Lane_checkbox = tk.IntVar()
         c = ttk.Checkbutton(root,
                             text='Tick the box if your journey take place between 9am-4pm or 7pm-midnight',
-                            command=self.Checkbox(),
-                            variable = self.x,
+                            variable=self.bakerloo_Lane_checkbox,
                             onvalue=1,
                             offvalue=0)
         c.pack()
 
-    def Checkbox(self):
-
-        if (self.x.get() == 1):
-         bakerloo_line_experiment()
-        else:
-            pass
-    def tranform_data(self, track_path, track_lines):
-        path = OrderedDict() # store the path as dict as {station_name: [line_name, travel time]}
+    def tranform_data(self, track_path, track_lines, is_bakerloo_lane):
+        path = OrderedDict()  # store the path as dict as {station_name: [line_name, travel time]}
         global possibleMoves
         prev_station = None
+        total_Time = 0
         for station, lane in zip(track_path, track_lines):
 
             path[station] = [station, set(lane)]
             if not prev_station:
-                path[station].append(0) # first station is always 0
+                path[station].append(1)  # first station is always 1
+                total_Time += 1
             else:
-                path[station].append(possibleMoves[prev_station[0]][station]) # first station is always 0
+                travel_time = possibleMoves[prev_station[0]][station] if not is_bakerloo_lane \
+                    else possibleMoves[prev_station[0]][station] / 2
+                path[station].append(travel_time)
+                total_Time += travel_time
                 # Updating travelling lane
-                prev_station[1] = prev_station[1].intersection(path[station][1])
-                path[prev_station[0]] = path[prev_station[0]][1:3]
-
+                prev_station[1] = prev_station[1].intersection(
+                    path[station][1])  # updating the lane name where both have the common lane
+                path[prev_station[0]] = path[prev_station[0]][
+                                        1:5]  # Just keep lane name and station_name from the array
+            path[station].append(total_Time)
             prev_station = path[station]
         # path[track_path[-1]][2] = 0 # setting the last station to 0
-        path[track_path[-1]]= path[track_path[-1]][1:3] #last station
+        path[track_path[-1]] = path[track_path[-1]][1:5]  # last station
         return path
 
     def plan_journey_now(self):
@@ -203,16 +200,16 @@ class UndergroundGUI(tk.Tk):
         # getting the input values
         start_station = self.user_starting_point.get()
         destination = self.user_destination.get()
-
-        print(start_station, destination)
-
         # calling dijkstra alg find the route
         path = dijkstra(start_station, destination)
-        tranformed_data = self.tranform_data(path[1], path[2])
+        tranformed_data = self.tranform_data(path[1], path[2],
+                                             self.bakerloo_Lane_checkbox.get())
 
-        for station in tranformed_data :
-                print(':',station," "*(25-len(station)),':', " OR ".join(tranformed_data[station][0]),  ":",
-                      tranformed_data[station][1])
+        for station in tranformed_data:
+            print(':', station, " " * (25 - len(station)), ':', " OR ".join(tranformed_data[station][0]), ":",
+                  tranformed_data[station][1], ":", tranformed_data[station][2])
+
+        print("If you are travelling within the stated time and your journey uses bakerloo line (else ignore this line )your total travel time will decrease to:", tranformed_data[list(tranformed_data.keys())[-1]][2],'minutes')
 
 
     def input_starting_station(self):
@@ -245,7 +242,6 @@ class UndergroundGUI(tk.Tk):
 
 
 def start_gui():
-
     root = tk.Tk()
     app = UndergroundGUI(root)
     root.mainloop()
@@ -253,3 +249,4 @@ def start_gui():
 
 if __name__ == '__main__':
     start_gui()
+    print("time elapsed: {:.2f}s".format(time.time() - start_time))
