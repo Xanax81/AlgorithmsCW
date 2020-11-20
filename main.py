@@ -123,11 +123,8 @@ def dijkstra(starting_station, destination):
         print("Shortest journey time is: " + str(shortest_distance[destination] - 1) + " minutes")
         print("Optimal path is: " + str(track_path))
         print(track_lines)
-        # Creating_Table
-        # header
+        #Creating table header
         print(': List of Stations in journey: List of Lines : Travel time to next station :Total time travel ')
-        # for item in track_path :
-        #         print(':',item," "*(25-len(item)),':')
         return shortest_distance[destination] - 1, track_path, track_lines
 
 
@@ -177,7 +174,7 @@ class UndergroundGUI(tk.Tk):
             path[station] = [station, set(lane)]
             if not prev_station:
                 path[station].append(1)  # first station is always 1
-                total_Time += 1
+                total_Time += 0
             else:
                 travel_time = possibleMoves[prev_station[0]][station] if not is_bakerloo_lane \
                     else possibleMoves[prev_station[0]][station] / 2
