@@ -1,9 +1,13 @@
+import base64
 import copy
+import io
 import time
 import tkinter as tk
 from collections import OrderedDict
 from tkinter import ttk
 
+import matplotlib.pyplot as plt
+import networkx as nx
 import pandas  # add pandas and xlrd into interpreter
 
 start_time = time.time()
@@ -123,8 +127,11 @@ def dijkstra(starting_station, destination):
         print("Shortest journey time is: " + str(shortest_distance[destination] - 1) + " minutes")
         print("Optimal path is: " + str(track_path))
         print(track_lines)
-        #Creating table header
+        # Creating_Table
+        # header
         print(': List of Stations in journey: List of Lines : Travel time to next station :Total time travel ')
+        # for item in track_path :
+        #         print(':',item," "*(25-len(item)),':')
         return shortest_distance[destination] - 1, track_path, track_lines
 
 
@@ -132,8 +139,10 @@ class UndergroundGUI(tk.Tk):
 
     def __init__(self, root):
 
+        super().__init__()
         self.root = root  # TK object
-        self.root.geometry('620x400')
+        self.root.geometry('1200x1000')
+        self.root.title('Fantastic Route Planner')
         Label_0 = ttk.Label(self.root, text='Welcome to Fantastic Route Planner', width="300", font=("Calibri", 30))
         Label_0.pack(padx=(10, 0))
 
@@ -163,33 +172,50 @@ class UndergroundGUI(tk.Tk):
                             onvalue=1,
                             offvalue=0)
         c.pack()
+        # Store journey image
+        self.image_journey = tk.PhotoImage()
+        self.image_journey_label = tk.Label(self.root, image=self.image_journey, padx=20, pady=20)
+        self.image_journey_label.pack()
 
     def tranform_data(self, track_path, track_lines, is_bakerloo_lane):
-        path = OrderedDict()  # store the path as dict as {station_name: [line_name, travel time]}
+        path = OrderedDict()  # store the path as dict as {station_name: [line_name, travel time, cumulative_total_tile]}
         global possibleMoves
         prev_station = None
-        total_Time = 0
         for station, lane in zip(track_path, track_lines):
 
             path[station] = [station, set(lane)]
             if not prev_station:
                 path[station].append(1)  # first station is always 1
-                total_Time += 0
             else:
-                travel_time = possibleMoves[prev_station[0]][station] if not is_bakerloo_lane \
-                    else possibleMoves[prev_station[0]][station] / 2
-                path[station].append(travel_time)
-                total_Time += travel_time
-                # Updating travelling lane
                 prev_station[1] = prev_station[1].intersection(
                     path[station][1])  # updating the lane name where both have the common lane
+
+                if is_bakerloo_lane and 'Bakerloo' in prev_station[1]:
+                    prev_station[2] = ((prev_station[2] - 1) / 2) + 1  # Aboding time stays always stays same
+
+                travel_time = possibleMoves[prev_station[0]][station]
+
+                path[station].append(travel_time)
+                # Updating travelling lane
+
                 path[prev_station[0]] = path[prev_station[0]][
                                         1:5]  # Just keep lane name and station_name from the array
-            path[station].append(total_Time)
+            # path[station].append(total_Time)
             prev_station = path[station]
         # path[track_path[-1]][2] = 0 # setting the last station to 0
         path[track_path[-1]] = path[track_path[-1]][1:5]  # last station
+
+        total_Time = 0
+        for station in path.keys():
+            travel_time = path[station][1]
+            total_Time += travel_time
+            path[station].append(total_Time)
+
         return path
+
+    def update_Jorney_plan(self, img):
+        self.image_journey.put(img)
+        self.image_journey_label.pack()
 
     def plan_journey_now(self):
 
@@ -205,9 +231,56 @@ class UndergroundGUI(tk.Tk):
         for station in tranformed_data:
             print(':', station, " " * (25 - len(station)), ':', " OR ".join(tranformed_data[station][0]), ":",
                   tranformed_data[station][1], ":", tranformed_data[station][2])
+        # initializing an empty graph
+        G = nx.DiGraph()
+        prev_station = None
+        formatted_edge_labels = {}
+        for station in tranformed_data.keys():
+            G.add_node(station)
+            if prev_station:
+                G.add_edge(prev_station, station, weight=tranformed_data[station][1])  # addding node to the graph
+                formatted_edge_labels[(prev_station, station)] = tranformed_data[station][
+                    1]  # time of current station to next station
+            prev_station = station
 
-        print("If you are travelling within the stated time and your journey uses bakerloo line (else ignore this line )your total travel time will decrease to:", tranformed_data[list(tranformed_data.keys())[-1]][2],'minutes')
+        pos = nx.spring_layout(G)
+        plt.clf()
 
+        columns_labels = ["Station", "Travel Time", "Total Time", "Lane"]
+        plt.subplots_adjust(left=0.2, top=0.8)
+        fig, axs = plt.subplots(2, 1)
+
+        clust_data = [[station] + tranformed_data[station][1:3] + [' OR '.join(tranformed_data[station][0:1][0])]
+                      for station in tranformed_data.keys()]
+        print(clust_data)
+        axs[0].axis('tight')
+        axs[0].axis('off')
+
+        the_table = axs[0].table(cellText=clust_data, colLabels=columns_labels, loc='center')
+        the_table.auto_set_font_size(False)
+        the_table.set_fontsize(5.5)
+        the_table.auto_set_column_width(
+            col=list(range(len(columns_labels))))  # Provide integer list of columns to adjust
+
+        # axs[1].plot(clust_data[:, 0], clust_data[:, 1])
+
+        # nx.draw(G, with_labels=True, arrows=True)
+        nx.draw(G, pos, font_size=3, with_labels=True, arrows=True,
+                edge_color='b', arrowsize=5, arrowstyle='fancy', ax=axs[1]
+                )
+        nx.draw_networkx_edge_labels(G, pos, edge_labels=formatted_edge_labels, font_color='red', )
+
+        axs[1].set_axis_off()
+
+        pic_IObytes = io.BytesIO()
+        plt.savefig(pic_IObytes, format='png', dpi=200)
+        pic_IObytes.seek(0)
+        pic_hash = base64.b64encode(pic_IObytes.read())
+        self.update_Jorney_plan(pic_hash)
+
+        plt.savefig('plotgraph.png', dpi=800, bbox_inches='tight')
+
+        print("TOTAL JOURNEY TIME:", tranformed_data[list(tranformed_data.keys())[-1]][2])
 
     def input_starting_station(self):
 
