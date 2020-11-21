@@ -138,8 +138,6 @@ def dijkstra(starting_station, destination):
 class UndergroundGUI(tk.Tk):
 
     def __init__(self, root):
-
-        super().__init__()
         self.root = root  # TK object
         self.root.geometry('1200x1000')
         self.root.title('Fantastic Route Planner')
