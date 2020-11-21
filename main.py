@@ -1,7 +1,7 @@
 import base64
 import copy
 import io
-import time
+#import time
 import tkinter as tk
 from collections import OrderedDict
 from tkinter import ttk
@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import pandas  # add pandas and xlrd into interpreter
 
-start_time = time.time()
+#start_time = time.time()
 data = pandas.read_excel('data.xlsx')  # receiving data from given excel file
 dataLine = []
 dataFromStation = []
@@ -141,8 +141,8 @@ class UndergroundGUI(tk.Tk):
         self.root = root  # TK object
         self.root.geometry('1200x1000')
         self.root.title('Fantastic Route Planner')
-        Label_0 = ttk.Label(self.root, text='Welcome to Fantastic Route Planner', width="300", font=("Calibri", 30))
-        Label_0.pack(padx=(10, 0))
+        label_0 = ttk.Label(self.root, text='Welcome to Fantastic Route Planner', width="300", font=("Calibri", 30))
+        label_0.pack(padx=(250, 0))
 
         # User inputs
         self.user_starting_point = tk.StringVar()
@@ -158,8 +158,8 @@ class UndergroundGUI(tk.Tk):
         self.destination_entry = ttk.Entry(self.root, width=15, textvariable=self.user_destination)
         self.destination_entry.pack()
 
-        Planning_button = ttk.Button(self.root, text='Start planning your journey', command=self.plan_journey_now)
-        Planning_button.pack()
+        planning_button = ttk.Button(self.root, text='Start planning your journey', command=self.plan_journey_now)
+        planning_button.pack()
 
         quit_button = ttk.Button(self.root, text='Exit Fantastic route Planner', command=self.root.destroy)
         quit_button.pack()
@@ -203,15 +203,15 @@ class UndergroundGUI(tk.Tk):
         # path[track_path[-1]][2] = 0 # setting the last station to 0
         path[track_path[-1]] = path[track_path[-1]][1:5]  # last station
 
-        total_Time = 0
+        total_time = 0
         for station in path.keys():
             travel_time = path[station][1]
-            total_Time += travel_time
-            path[station].append(total_Time)
+            total_time += travel_time
+            path[station].append(total_time)
 
         return path
 
-    def update_Jorney_plan(self, img):
+    def update_journey_plan(self, img):
         self.image_journey.put(img)
         self.image_journey_label.pack()
 
@@ -219,8 +219,8 @@ class UndergroundGUI(tk.Tk):
 
         print("Planning Journey")
         # getting the input values
-        start_station = self.user_starting_point.get()
-        destination = self.user_destination.get()
+        start_station = self.user_starting_point.get().lower()
+        destination = self.user_destination.get().lower()
         # calling dijkstra alg find the route
         path = dijkstra(start_station, destination)
         tranformed_data = self.tranform_data(path[1], path[2],
@@ -274,7 +274,7 @@ class UndergroundGUI(tk.Tk):
         plt.savefig(pic_IObytes, format='png', dpi=200)
         pic_IObytes.seek(0)
         pic_hash = base64.b64encode(pic_IObytes.read())
-        self.update_Jorney_plan(pic_hash)
+        self.update_journey_plan(pic_hash)
 
         plt.savefig('plotgraph.png', dpi=800, bbox_inches='tight')
 
@@ -282,7 +282,6 @@ class UndergroundGUI(tk.Tk):
 
     def input_starting_station(self):
 
-        # TODO: consider if the user input is lower case, it's also a bit confusing, maybe recheck the logic and the code
         startingStation = self.user_starting_point.get()
         print(startingStation)
         if startingStation not in dataFromStation:
@@ -317,4 +316,4 @@ def start_gui():
 
 if __name__ == '__main__':
     start_gui()
-    print("time elapsed: {:.2f}s".format(time.time() - start_time))
+    #print("time elapsed: {:.2f}s".format(time.time() - start_time))
