@@ -1,16 +1,14 @@
 import base64
 import copy
 import io
-#import time
 import tkinter as tk
 from collections import OrderedDict
 from tkinter import ttk
-
 import matplotlib.pyplot as plt
 import networkx as nx
 import pandas  # add pandas and xlrd into interpreter
 
-#start_time = time.time()
+
 data = pandas.read_excel('data.xlsx')  # receiving data from given excel file
 dataLine = []
 dataFromStation = []
@@ -124,14 +122,11 @@ def dijkstra(starting_station, destination):
     track_lines.insert(0, stationLines[starting_station])
 
     if shortest_distance[destination] != 999999:
-        print("Shortest journey time is: " + str(shortest_distance[destination] - 1) + " minutes")
         print("Optimal path is: " + str(track_path))
         print(track_lines)
-        # Creating_Table
-        # header
+        # Creating_Table_for_the_console
+        # header_of_the_table
         print(': List of Stations in journey: List of Lines : Travel time to next station :Total time travel ')
-        # for item in track_path :
-        #         print(':',item," "*(25-len(item)),':')
         return shortest_distance[destination] - 1, track_path, track_lines
 
 
@@ -139,39 +134,39 @@ class UndergroundGUI(tk.Tk):
 
     def __init__(self, root):
         self.root = root  # TK object
-        self.root.geometry('1200x1000')
-        self.root.title('Fantastic Route Planner')
-        label_0 = ttk.Label(self.root, text='Welcome to Fantastic Route Planner', width="300", font=("Calibri", 30))
+        self.root.geometry('1200x1000') #Setting the size of the GUI window
+        self.root.title('Fantastic Route Planner') #Setting the name of the GUI window
+        label_0 = ttk.Label(self.root, text='Welcome to Fantastic Route Planner', width="300", font=("Calibri", 30)) #Adding a header to the GUI
         label_0.pack(padx=(250, 0))
 
         # User inputs
         self.user_starting_point = tk.StringVar()
         self.user_destination = tk.StringVar()
 
-        staring_label = ttk.Label(self.root, text='Starting station:')
-        staring_label.pack()
-        starting_entry = ttk.Entry(self.root, width=15, textvariable=self.user_starting_point)
+        starting_label = ttk.Label(self.root, text='Starting station:') #Labelling the entry
+        starting_label.pack()
+        starting_entry = ttk.Entry(self.root, width=15, textvariable=self.user_starting_point) #Creating an entry for user's input
         starting_entry.pack()
 
-        destination_label = ttk.Label(self.root, text='Destination:')
+        destination_label = ttk.Label(self.root, text='Destination:') #Labelling the entry
         destination_label.pack()
-        self.destination_entry = ttk.Entry(self.root, width=15, textvariable=self.user_destination)
+        self.destination_entry = ttk.Entry(self.root, width=15, textvariable=self.user_destination)#Creating an entry for user's input
         self.destination_entry.pack()
 
-        planning_button = ttk.Button(self.root, text='Start planning your journey', command=self.plan_journey_now)
+        planning_button = ttk.Button(self.root, text='Start planning your journey', command=self.plan_journey_now)  #Creating a button to start planning the journey
         planning_button.pack()
 
-        quit_button = ttk.Button(self.root, text='Exit Fantastic route Planner', command=self.root.destroy)
+        quit_button = ttk.Button(self.root, text='Exit Fantastic route Planner', command=self.root.destroy) #Creating a button to exit the GUi
         quit_button.pack()
         self.bakerloo_Lane_checkbox = tk.IntVar()
         c = ttk.Checkbutton(root,
                             text='Tick the box if your journey take place between 9am-4pm or 7pm-midnight',
                             variable=self.bakerloo_Lane_checkbox,
                             onvalue=1,
-                            offvalue=0)
+                            offvalue=0) #Adding the checkbox for the extra functionality
         c.pack()
         # Store journey image
-        self.image_journey = tk.PhotoImage()
+        self.image_journey = tk.PhotoImage() #Creating a space in the GUI for the table's image
         self.image_journey_label = tk.Label(self.root, image=self.image_journey, padx=20, pady=20)
         self.image_journey_label.pack()
 
@@ -218,95 +213,75 @@ class UndergroundGUI(tk.Tk):
     def plan_journey_now(self):
 
         print("Planning Journey")
-        # getting the input values
+        # getting the input values from the user
         start_station = self.user_starting_point.get().lower()
         destination = self.user_destination.get().lower()
-        # calling dijkstra alg find the route
+
+        # calling dijkstra Algorithm to find the route
         path = dijkstra(start_station, destination)
         tranformed_data = self.tranform_data(path[1], path[2],
                                              self.bakerloo_Lane_checkbox.get())
 
         for station in tranformed_data:
             print(':', station, " " * (25 - len(station)), ':', " OR ".join(tranformed_data[station][0]), ":",
-                  tranformed_data[station][1], ":", tranformed_data[station][2])
+                  tranformed_data[station][1], ":", tranformed_data[station][2]) #print to console
         # initializing an empty graph
         G = nx.DiGraph()
         prev_station = None
-        formatted_edge_labels = {}
+        formatted_edge_labels = {} # Using labels for the each path
         for station in tranformed_data.keys():
             G.add_node(station)
             if prev_station:
-                G.add_edge(prev_station, station, weight=tranformed_data[station][1])  # addding node to the graph
+                G.add_edge(prev_station, station, weight=tranformed_data[station][1])  # Addding node to the graph
                 formatted_edge_labels[(prev_station, station)] = tranformed_data[station][
-                    1]  # time of current station to next station
+                    1]  # Time of current station to next station
             prev_station = station
 
-        pos = nx.spring_layout(G)
-        plt.clf()
+        pos = nx.spring_layout(G) # Position nodes in adjacent
+        plt.clf() # Clears the current figure
 
         columns_labels = ["Station", "Travel Time", "Total Time", "Lane"]
         plt.subplots_adjust(left=0.2, top=0.8)
         fig, axs = plt.subplots(2, 1)
 
         clust_data = [[station] + tranformed_data[station][1:3] + [' OR '.join(tranformed_data[station][0:1][0])]
-                      for station in tranformed_data.keys()]
+                      for station in tranformed_data.keys()] # Combining data to fit in the table
         print(clust_data)
         axs[0].axis('tight')
         axs[0].axis('off')
 
-        the_table = axs[0].table(cellText=clust_data, colLabels=columns_labels, loc='center')
+        the_table = axs[0].table(cellText=clust_data, colLabels=columns_labels,
+                                 loc='center') # Creating table on the figure
         the_table.auto_set_font_size(False)
         the_table.set_fontsize(5.5)
         the_table.auto_set_column_width(
             col=list(range(len(columns_labels))))  # Provide integer list of columns to adjust
 
-        # axs[1].plot(clust_data[:, 0], clust_data[:, 1])
-
-        # nx.draw(G, with_labels=True, arrows=True)
         nx.draw(G, pos, font_size=3, with_labels=True, arrows=True,
                 edge_color='b', arrowsize=5, arrowstyle='fancy', ax=axs[1]
-                )
+                ) # drawing the graph on the 1st axis
         nx.draw_networkx_edge_labels(G, pos, edge_labels=formatted_edge_labels, font_color='red', )
-
+        # lables to the station
         axs[1].set_axis_off()
-
+        # Saving the image on the memory for it display on the GUI
         pic_IObytes = io.BytesIO()
         plt.savefig(pic_IObytes, format='png', dpi=200)
         pic_IObytes.seek(0)
         pic_hash = base64.b64encode(pic_IObytes.read())
         self.update_journey_plan(pic_hash)
-
+        # Saves cache onto the hard disk
         plt.savefig('plotgraph.png', dpi=800, bbox_inches='tight')
 
         print("TOTAL JOURNEY TIME:", tranformed_data[list(tranformed_data.keys())[-1]][2])
 
-    def input_starting_station(self):
+    def input_starting_station(self): #Function_called_to_get_the_user_starting_station
 
         startingStation = self.user_starting_point.get()
         print(startingStation)
-        if startingStation not in dataFromStation:
-            if startingStation not in dataToStation:
-                print("There is no such a station D:")
-                startingStation = self.input_starting_station()
-                return startingStation
-            else:
-                return startingStation
-        else:
-            return startingStation
 
-    def input_destination(self):
+    def input_destination(self): #Function_called_to_get_the_user_destination
         destination = self.user_destination.get()
         print(destination)
-        if destination not in dataToStation:
-            if destination not in dataFromStation:
-                print("There is no such a station D:")
-                destination = self.input_destination()
-                return destination
-            else:
-                return destination
-        else:
-            return destination
-
 
 def start_gui():
     root = tk.Tk()
@@ -316,4 +291,4 @@ def start_gui():
 
 if __name__ == '__main__':
     start_gui()
-    #print("time elapsed: {:.2f}s".format(time.time() - start_time))
+
