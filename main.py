@@ -8,7 +8,6 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import pandas  # add pandas and xlrd into interpreter
 
-
 data = pandas.read_excel('data.xlsx')  # receiving data from given excel file
 dataLine = []
 dataFromStation = []
@@ -33,6 +32,7 @@ for i in range(len(data)):
     dataActualTravelTime[i] += 1  # this is open doors timing
     # we can just increase all the times since first node will not be affected and last one is common for all paths
     # just have to remember to subtract 1 from final solution (destination node time)
+
 possibleMoves = {}  # this is nested dictionary of travel times to all adjacent nodes (stations)
 for i in range(len(data)):
     if dataFromStation[i] in possibleMoves.keys():
@@ -63,7 +63,6 @@ for i in range(len(data)):
         stationLines[dataToStation[i]] = []
         stationLines[dataToStation[i]].append(dataLine[i])
 
-
 def common_line(list1, list2):
     answer = False
     for x in list1:
@@ -71,7 +70,6 @@ def common_line(list1, list2):
             answer = True
             return answer
     return answer
-
 
 def dijkstra(starting_station, destination):
     shortest_distance = {}
