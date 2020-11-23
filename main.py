@@ -30,8 +30,8 @@ for i in range(len(data)):
 dataActualTravelTime = dataTravelTime
 for i in range(len(data)):
     dataActualTravelTime[i] += 1  # this is open doors timing
-    # we can just increase all the times since first node will not be affected and last one is common for all paths
-    # just have to remember to subtract 1 from final solution (destination node time)
+    # we can just increase all the times since first node will not be affected
+
 
 possibleMoves = {}  # this is nested dictionary of travel times to all adjacent nodes (stations)
 for i in range(len(data)):
@@ -99,7 +99,8 @@ def dijkstra(starting_station, destination):
                 shortest_distance[childNode] = weight + shortest_distance[minimal_distance_node]
                 track_predecessor[childNode] = minimal_distance_node
                 track_predecessor_line[childNode] = stationLines[minimal_distance_node]
-
+        if minimal_distance_node == destination : #when the algorithm reaches the final destination it stops the calculation
+            break
         unseen_nodes.pop(minimal_distance_node)
 
     current_node = destination
